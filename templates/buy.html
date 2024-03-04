@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Buy
+{% endblock %}
+
+{% block main %}
+    <form action="/buy" method="post">
+        <input autocomplete="off" autofocus name="symbol" placeholder="Symbol" type="text">
+        <input autocomplete="off" name="shares" placeholder="Number of Shares" type="text">
+        <button type="submit">Buy</button>
+    </form>
+    <br>
+    <br>
+
+
+    <form action="/add" method="post">
+        Add money to your account:
+        <input name="add" placeholder="Add amount of cash" type="number" step="0.01" min="1">
+        <button type="submit">Add</button>
+    </form>
+
+{% endblock %}

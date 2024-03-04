@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sell
+{% endblock %}
+
+{% block main %}
+    <form action="/sell" method="post">
+        <select name="symbol">
+            <option disabled selected value="">Choose your Stock</option>
+            {% for stock in stocks %}
+                <option value="{{ stock['stock_name'] }}">{{ stock["stock_name"] }}</option>
+            {% endfor %}
+        </select>
+        <input autocomplete="off" autofocus name="shares" placeholder="Number of shares" type="text">
+        <button type="submit">Sell</button>
+    </form>
+    <!-- {{lista}} -->
+    <br>
+    <br>
+    poprzednia ilosc akcji: {{owned_shares}}
+
+    <br>
+    <br>
+    teraz ilosc akcji: {{teraz_owned_shares}}
+
+
+{% endblock %}

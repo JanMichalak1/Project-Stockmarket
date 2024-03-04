@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quoted
+{% endblock %}
+
+{% block main %}
+ <h1 class="title">Hi, {{juser}} </h1>
+ <br>
+
+ <h2 class="title2">This is your stock portfolio:</h2>
+ <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Stock</th>
+            <th>Number of Shares</th>
+            <th>Current price</th>
+            <th>Total value</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for x in bows %}
+        <tr>
+            {% if x["tshares"] > 0 %}
+                <td>{{x["stock_name"]}}</td>
+                <td>{{x["tshares"]}}</td>
+                <td>{{usd(x["price"])}}</td>
+                <td>{{usd(x["total"])}}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+         <!-- <tr>
+            <td>CASH</td>
+            <td colspan=2></td>
+            <td>{{luzers}}</td>
+        </tr> -->
+    </tbody>
+ </table>
+
+ <br>
+ Your cash balance: {{usd(luzers)}}
+ <br>
+ <br>
+
+ Your Grand Total: {{usd(Grand_total)}}
+ <!-- Could add a django addition for training ^ didnt work xd -->
+{% endblock %}

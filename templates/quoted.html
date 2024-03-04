@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quoted
+{% endblock %}
+
+{% block main %}
+  This is the current price of stock {{gielda["symbol"]}}: {{usd(gielda["price"])}}
+
+{% endblock %}
