@@ -63,7 +63,11 @@ def index():
 
     Grand_total += float(luzers)
 
-    return render_template("index.html", bows=bows, luzers=luzers, Grand_total=Grand_total, usd=usd, juser=juser)
+    Grand_total2 = Grand_total
+
+    net = int(Grand_total2)-10000
+
+    return render_template("index.html", bows=bows, luzers=luzers, Grand_total=Grand_total, usd=usd, juser=juser, net=net)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -75,18 +79,18 @@ def buy():
         gielda1 = lookup(request.form.get("symbol"))
 
         if gielda1 == None:
-            return apology("this symbol does not exist bro", 400)
+            return apology("Sorry, this symbol does not exist. Please provide official symbol.", 400)
 
         if not request.form.get("shares"):
-            return apology("must provide number of shares to buy bro", 400)
+            return apology("Did not provide number of shares to buy", 400)
 
         akcje = request.form.get("shares")
 
         if not akcje.isdigit():
-            return apology("must provide only positive integer bro", 400)
+            return apology("Please provide only positive integer", 400)
 
         if int(akcje) == 0:
-            return apology("must provide only positive integer brother", 400)
+            return apology("Please provide only positive integer", 400)
 
         price = gielda1["price"]
         nazwa = gielda1["symbol"]
@@ -97,8 +101,10 @@ def buy():
 
         suma = float(price) * float(akcje)
 
+        message = "Sorry, You don't have enough cash to buy that stock"
+
         if suma > float(cash_left[0]["cash"]):  # moze byc zle
-            return apology("You cannot afford that number of shares bro", 400)
+            return render_template("guidance_to_buy.html", message=message) #RETURN TEMPLATE WITH GUIDANCE TO BUY SECTION
 
         koniec = cash_left[0]["cash"] - suma
 
@@ -111,14 +117,28 @@ def buy():
 
     else:
 
-        return render_template("buy.html")
+        stock_table = db.execute("SELECT COUNT(stock_name), stock_name, price FROM purchases GROUP BY stock_name ORDER BY COUNT(stock_name) DESC LIMIT 10")
+
+    # bum = bows[0]["price"]
+        
+        x = 0
+        for z in stock_table:
+            check_price = lookup(stock_table[x]["stock_name"])
+
+            current_price = check_price["price"]
+
+            stock_table[x]["price"] = current_price
+            # tabela = db.execute(")
+            x += 1
+
+        return render_template("buy.html", stock_table=stock_table, usd=usd)
 
 
 @app.route("/history")
 @login_required
 def history():
-    """Show history of transactions"""
-    lows = db.execute("SELECT type, stock_name, price, shares_number, date FROM purchases WHERE user_id = ?", session["user_id"])
+    
+    lows = db.execute("SELECT type, stock_name, price, shares_number, date FROM purchases WHERE user_id = ? ORDER BY date DESC", session["user_id"])
 
     return render_template("history.html", lows=lows, usd=usd)
 
@@ -134,11 +154,11 @@ def login():
     if request.method == "POST":
         # Ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username", 403)
+            return apology("Must provide username", 403)
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password", 403)
+            return apology("Must provide password", 403)
 
         # Query database for username
         rows = db.execute(
@@ -149,7 +169,7 @@ def login():
         if len(rows) != 1 or not check_password_hash(
             rows[0]["hash"], request.form.get("password")
         ):
-            return apology("invalid username and/or password", 403)
+            return apology("Invalid username and/or password", 403)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -178,12 +198,12 @@ def logout():
 def quote():
     if request.method == "POST":
         if not request.form.get("symbol"):
-            return apology("must provide symbol bro", 400)
+            return apology("must provide symbol", 400)
 
         gielda = lookup(request.form.get("symbol"))
 
         if gielda == None:
-            return apology("this symbol is not a stock symbol", 400)
+            return apology("Sorry, this symbol is not a stock symbol", 400)
 
         return render_template("quoted.html", gielda=gielda, usd=usd)
     else:
@@ -195,32 +215,37 @@ def register():
 
     if request.method == "POST":
         if not request.form.get("username"):
-            return apology("must provide username lol", 400)
+            return apology("must provide username", 400)
         tows = db.execute(
             "SELECT * FROM users WHERE username = ?", request.form.get("username")
         )
 
         if len(tows) != 0:  # could be if len(tows): or sth else
-            return apology("The username already exists", 400)
+            return apology("Sorry, that username already exists", 400)
 
         if not request.form.get("password"):
-            return apology("must provide password lol", 400)
+            return apology("Must provide password", 400)
 
         if not request.form.get("confirmation"):
-            return apology("must confirm the password", 400)
+            return apology("Must confirm the password", 400)
 
         if (request.form.get("password") != request.form.get("confirmation")):
-            return apology("the passwords are not the same", 400)
+            return apology("The passwords are not the same", 400)
 
         haslo = generate_password_hash(request.form.get("password"), method='pbkdf2', salt_length=16)
 
         db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", request.form.get("username"), haslo)
-        return redirect("/")
+        
+        start_user = request.form.get("username")
+
+        return render_template("welcome.html", start_user=start_user)
+
+        # return redirect("/")
 
     else:
 
         return render_template("register.html")
-        # return apology("lol")
+        
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -232,32 +257,33 @@ def sell():
     for a in stocks:
         lista.append(stocks[b]["stock_name"])
         b += 1
+    choices = db.execute("SELECT SUM(shares_number), stock_name FROM purchases WHERE user_id = ? GROUP BY stock_name", session["user_id"])
 
     if request.method == "POST":
         if not request.form.get("symbol"):
-            return apology("You should pick the stock bro!", 400)
+            return apology("You did not pick the stock", 400)
         if not request.form.get("shares"):
-            return apology("You should provide the number of shares!", 400)
+            return apology("You did not provide the number of shares", 400)
         if request.form.get("symbol") not in lista:
-            return apology("You should not give different stocks!", 400)
+            return apology("You should not give different stocks!", 400) #check
         numer = request.form.get("shares")
         symbolik = request.form.get("symbol")
 
         if not numer.isdigit():
-            return apology("must provide positive integer bro!", 400)
+            return apology("Must provide positive integer", 400)
         if int(numer) == 0:
-            return apology("must provide positive integer bro!", 400)
+            return apology("Must provide positive integer", 400)
 
         owned_shares = db.execute("SELECT SUM(shares_number) FROM purchases WHERE stock_name = ? AND user_id = ?",
                                   symbolik, session["user_id"])[0]["SUM(shares_number)"]
 
         if int(numer) > int(owned_shares):
-            return apology("You dont have that many shares Sire", 400)
+            return apology("You do not have that many shares of that stock", 400)
 
         gielda2 = lookup(request.form.get("symbol"))
 
         if gielda2 == None:
-            return apology("this symbol does not exist bro", 400)
+            return apology("This symbol does not exist", 400)
 
         price2 = gielda2["price"]
         typ2 = "sold"
@@ -282,7 +308,7 @@ def sell():
         return redirect("/")
         # return render_template("sell.html", stocks=stocks, lista=lista, owned_shares=owned_shares, teraz_owned_shares=teraz_owned_shares)
     else:
-        return render_template("sell.html", stocks=stocks, lista=lista)
+        return render_template("sell.html", stocks=stocks, lista=lista, choices=choices)
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -290,12 +316,12 @@ def sell():
 def add():
     if request.method == "POST":
         if not request.form.get("add"):
-            return apology("must provide amount of cash to add", 400)
+            return apology("Must provide amount of cash to add", 400)
 
         current_balance = db.execute("SELECT cash FROM users WHERE id= ?", session["user_id"])[0]["cash"]
 
         if float(request.form.get("add")) < 1:
-            return apology("Minimum deposit is 1$ bro", 400)
+            return apology("Minimum deposit is 1$", 400)
 
         sum = float(current_balance) + float(request.form.get("add"))
 
@@ -304,3 +330,66 @@ def add():
         return redirect("/")
     else:
         return render_template("buy.html")
+
+
+@app.route("/Forum", methods=["GET", "POST"])
+@login_required
+def post():
+    # post_content=''
+    # user=[{}]
+    
+    if request.method == "POST":
+        if not request.form.get("post"):
+            return apology("In order to post, write at least one letter", 400)
+        
+        post_content = request.form.get("post")
+
+        user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"] )[0]["username"]
+
+        db.execute("INSERT INTO posts (user_id, username, content) VALUES(?, ?, ?)", session["user_id"], user, post_content)
+
+        return redirect("/Forum")
+    
+    else:
+
+        post_board = db.execute("SELECT content, date, username FROM posts ORDER BY date DESC")
+
+        return render_template("forum.html", post_board=post_board)
+
+@app.route("/portfolios")
+@login_required
+def portfolios():
+    
+    user_table=[]
+    user_list=[]
+    user = db.execute("SELECT id FROM users")
+
+    jusername_list=[]
+    jusername= db.execute("SELECT username FROM users")
+
+    for y in jusername:
+        jusername_id= y["username"]
+        jusername_list.append(jusername_id)
+
+    y=0
+    for x in user:
+        # user_id = db.execute("SELECT id FROM users")[y]["id"]
+        user_id = x["id"]
+        user_list.append(user_id)
+        y+=1
+    a=0
+    for z in user_list:
+        user_table.append(db.execute("SELECT user_id, stock_name, SUM(shares_number) FROM purchases WHERE user_id = ? GROUP BY stock_name", z))
+        a+=1 #moga byc problemy z "z" bo nie wiadomo czy to int czy str
+
+
+    return render_template("user_portfolios.html", user_table=user_table, user_list=user_list, jusername_list=jusername_list)
+
+
+@app.route("/activity")
+@login_required
+def activity():
+    
+    activity = db.execute("SELECT type, stock_name, price, shares_number, date, username FROM purchases JOIN users ON purchases.user_id=users.id ORDER BY date DESC LIMIT 30")
+
+    return render_template("activity.html", activity=activity, usd=usd)

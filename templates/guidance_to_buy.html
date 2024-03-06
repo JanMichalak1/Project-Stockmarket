@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Apology
+{% endblock %}
+
+{% block main %}
+   
+    <br><br>
+    <h2>{{message}}</h2>
+    <br><br><br>
+    <form action="/" method="get">
+        <button class="btn btn-dark" type="submit"> Go back to the main page </button>
+    </form>
+    <br><br>
+    <form action="/buy" method="get">
+        <button class="btn btn-dark" type="submit"> Deposit Cash </button>
+    </form>
+
+{% endblock %}

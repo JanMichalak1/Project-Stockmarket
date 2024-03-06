@@ -8,21 +8,26 @@
     <form action="/sell" method="post">
         <select name="symbol">
             <option disabled selected value="">Choose your Stock</option>
-            {% for stock in stocks %}
+            <!-- {% for stock in stocks %}        
                 <option value="{{ stock['stock_name'] }}">{{ stock["stock_name"] }}</option>
+            {% endfor %} -->
+            {% for y in choices %}
+                {% if y["SUM(shares_number)"] > 0 %}
+                    <option value="{{y['stock_name']}}">{{ y["stock_name"]}}</option>
+                {% endif %}
             {% endfor %}
         </select>
-        <input autocomplete="off" autofocus name="shares" placeholder="Number of shares" type="text">
+        <input autocomplete="off" autofocus name="shares" placeholder="Number of shares" min="0" type="text">
         <button type="submit">Sell</button>
     </form>
     <!-- {{lista}} -->
     <br>
     <br>
-    poprzednia ilosc akcji: {{owned_shares}}
+    <!-- poprzednia ilosc akcji: {{owned_shares}} -->
 
     <br>
     <br>
-    teraz ilosc akcji: {{teraz_owned_shares}}
+    <!-- teraz ilosc akcji: {{teraz_owned_shares}} -->
 
 
 {% endblock %}

@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Forum
+{% endblock %}
+
+
+{% block main %}
+
+
+
+    <form action="/Forum" method="post">
+        
+        <input autocomplete="off" autofocus name="post" placeholder="Write a post" size="100" type="text">
+        <button type="submit">Post</button>
+    </form>
+    <br><br>
+    <h2 class="title"> Posts: </h2>
+    <br>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Feed</th>
+            </tr>
+        </thead>
+        <tbody>
+    {% for y in post_board %}
+        <tr>
+            <td class="text-start">{{y["username"]}} on {{y["date"]}} wrote:</td>
+        </tr>
+        <tr>
+            <td class="col-sm-3">{{y["content"]}}                                                                                                
+            </td>
+        </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+
+
+    
+    
+
+
+  
+
+{% endblock %}

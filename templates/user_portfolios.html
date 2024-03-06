@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Users' portfolios
+{% endblock %}
+
+{% block main %}
+
+ <h1 class="title">Users'portfolios:</h1>
+ <br>
+
+
+{% for c in jusername_list %}
+ <table style="margin: auto;" class="table table-sm w-25 p3 table-dark">  
+    <thead>
+        <tr>
+            <th colspan="3"> {{c}}'s portfolio</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Stock</th>
+            <th>Shares number</th>
+        </tr>
+        
+
+        {% for b in user_table[loop.index0] %}
+        <tr>
+            
+            {% if b["SUM(shares_number)"] > 0 %}
+            <td>{{b["stock_name"]}}</td>
+            <td>{{b["SUM(shares_number)"]}}</td>
+            {% endif %}
+
+        </tr>
+        
+   
+        {% endfor %}
+        
+        
+        </tbody>
+    </table>
+
+    <br><br><br>
+{% endfor %}
+
+{% endblock %}
+
