@@ -65,7 +65,7 @@ def index():
 
     Grand_total2 = Grand_total
 
-    net = int(Grand_total2)-10000
+    net = (Grand_total2)-10000
 
     return render_template("index.html", bows=bows, luzers=luzers, Grand_total=Grand_total, usd=usd, juser=juser, net=net)
 
@@ -180,17 +180,21 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+    
+    # taken from CS50x course
 
 
 @app.route("/logout")
 def logout():
-    """Log user out"""
+    
 
     # Forget any user_id
     session.clear()
 
     # Redirect user to login form
     return redirect("/")
+
+# taken from CS50 course
 
 
 @app.route("/quote", methods=["GET", "POST"])
