@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Activity
+{% endblock %}
+
+{% block main %}
+<h2> Users' activity: ( Last 30 entries )</h2>
+<br>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Transaction</th>
+            <th>Stock</th>
+            <th>Purchase/Sale Price</th>
+            <th>Number of Shares</th>
+            <th>Date and Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for x in activity %}
+        <tr>
+            <td>{{x["username"]}}</td>
+            <td>{{x["type"]}}</td>
+            <td>{{x["stock_name"]}}</td>
+            <td>{{usd(x["price"])}}</td>
+            <td>{{x["shares_number"]}}</td>
+            <td>{{x["date"]}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

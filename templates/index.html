@@ -39,9 +39,16 @@
 
  <br>
  Your cash balance: {{usd(luzers)}}
- <br>
- <br>
+ <br><br>
 
  Your Grand Total: {{usd(Grand_total)}}
- <!-- Could add a django addition for training ^ didnt work xd -->
+ <br><br>
+
+ {% if net < 0 %}
+    You have a {{usd(net)}} loss
+ {% elif net == 0 %}
+    You are even
+ {% else %}
+    You're {{usd(net)}} ahead!
+ {% endif %}
 {% endblock %}
